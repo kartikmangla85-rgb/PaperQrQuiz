@@ -10873,6 +10873,7 @@ function projMsg(m){
   if(!m) return;
   if(m.t==="q"){ if(q!==m.i){ q=m.i; liveVotes={}; } ensureQ(); keyOf[q]=m.correct; renderAll(); }
   else if(m.t==="class"){ applyClass(m); }
+  else if(m.t==="reset"){ q=0; answers=[{}]; keyOf=[null]; shown=[false]; seen={}; liveVotes={}; renderAll(); }
   else if(m.t==="reveal"){ if(q!==m.i){ q=m.i; ensureQ(); } shown[q]=true; renderAll(); }
 }
 function pconnect(){
