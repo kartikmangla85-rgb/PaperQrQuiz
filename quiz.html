@@ -18,7 +18,7 @@ header .by{font-size:clamp(11px,1.2vw,19px);color:#f1e3a9;margin-top:.1em}
 header .meta{font-size:clamp(14px,1.6vw,26px);color:#f1e3a9;white-space:nowrap}
 .bar{height:.7vw;min-height:6px;background:#dfe5f3}
 .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
-main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:2vw 5vw;min-height:0;overflow:auto}
+main{flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:2vw 5vw;min-height:0;overflow:auto}
 .tag{align-self:flex-start;background:var(--navy);color:#fff;border-radius:99px;padding:.2em .9em;font-size:clamp(12px,1.3vw,20px);margin-bottom:1vw}
 .tag.app{background:var(--gold);color:#14284B}
 .q{font-size:clamp(22px,3.3vw,56px);font-weight:700;line-height:1.25;margin:0 0 2vw}
@@ -41,9 +41,9 @@ footer{display:flex;gap:1.2vw;justify-content:center;align-items:center;padding:
 .btn.ghost{background:#e5e9f4;color:var(--navy)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn:focus-visible,.opt:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
-.center{max-width:900px;margin:0 auto;text-align:center;width:100%}
+.center{max-width:900px;margin:auto;text-align:center;width:100%}
 .center h2{font-size:clamp(24px,3.4vw,56px);margin:.2em 0}
-#quizsel{font:inherit;font-size:clamp(14px,1.6vw,26px);padding:.35em .6em;border:.2vw solid var(--line);border-radius:12px;background:#fff;color:var(--ink);max-width:100%;flex:1 1 320px}
+#quizsel,#clssel{font:inherit;font-size:clamp(14px,1.6vw,26px);padding:.35em .6em;border:.2vw solid var(--line);border-radius:12px;background:#fff;color:var(--ink);max-width:100%;flex:1 1 320px}
 .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1vw;margin:1vw 0}
 .choice{font:inherit;font-size:clamp(16px,1.9vw,30px);padding:.55em .8em;border:.25vw solid var(--line);border-radius:1vw;background:#fff;cursor:pointer;color:var(--ink)}
 .choice small{display:block;color:var(--muted);font-size:.65em;margin-top:.2em}
@@ -112,7 +112,7 @@ footer{display:flex;gap:1.2vw;justify-content:center;align-items:center;padding:
     </div>
     <div class="hint" id="clsinfo" style="min-height:1.2em"></div>
     <div class="row" style="align-items:center"><label class="hint">Prepared by (name on screen): <input id="byname" value="Kartik Mangla and team" maxlength="40" style="font:inherit;padding:.2em .5em;border:1px solid var(--line);border-radius:8px"></label></div>
-    <div class="hint">Choose chapter, question type and order, then start.</div>
+    <div class="hint">Choose chapter and order, then start.</div>
     <div class="choices" id="chapters"></div>
     <div class="row" id="types">
       <button class="pill on" data-v="all">All questions</button>
@@ -125,6 +125,7 @@ footer{display:flex;gap:1.2vw;justify-content:center;align-items:center;padding:
     </div>
     <div class="row"><button class="pill" id="shopt">Shuffle answer options: Off</button></div>
     <div class="row"><button class="btn gold" id="go">Start Quiz</button></div>
+    <div class="hint" style="font-size:.75em;opacity:.7;margin-top:.6em">Version: 16 Nov 2026 (v6)</div>
     <div class="row"><button class="btn ghost" id="qrconnect">Connect scanner phone (QR cards)</button></div>
     <div id="qrroom" class="hide" style="margin-top:.6em">
       <div class="hint">On the phone scanner tap <b>Connect to projector</b> and enter this code:</div>
