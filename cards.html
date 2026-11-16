@@ -43,7 +43,7 @@ button.gold{background:var(--gold);color:#14284B}
 <body>
 <div class="panel">
   <h1>QR Answer Cards</h1>
-  <div class="by">Prepared by Ajay Sethi &middot; Vrindavan Public School</div>
+  <div class="by">Prepared by Kartik Mangla and Team &middot; Vrindavan Public School</div>
   <div class="how help" style="margin-top:6px"><b>1. Add students</b> &mdash; any of the three ways below. The list underneath is what gets printed (one card per line).</div>
   <div class="row" style="margin-top:8px">
     <div><label>Import from Excel / CSV <span class="help">(columns: Class, Roll No, Name)</span></label>
@@ -2551,7 +2551,7 @@ function make(){
     card.appendChild(qrCanvas(r.code));
     const label=r.code.replace(/-(\d+)$/," / $1");
     const tag=document.createElement("div"); tag.className="tag"; tag.textContent=label+(r.name&&$("shownames").checked?"  \u00b7  "+r.name:""); card.appendChild(tag);
-    const f=document.createElement("div"); f.className="foot"; f.textContent="Ajay Sethi \u2014 for VPS students only"; card.appendChild(f);
+    const f=document.createElement("div"); f.className="foot"; f.textContent="Kartik Mangla and Team \u2014 for VPS students only"; card.appendChild(f);
     sheet.appendChild(card); count++;
   });
 }
