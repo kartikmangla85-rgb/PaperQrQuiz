@@ -638,7 +638,9 @@ function setQR(on){
 }
 function onQR(m){
   if(!m) return;
-  if(m.t==="roster"){ qrRoster=m.list||[]; updateQR(); }
+  if(m.t==="classok"){ clearTimeout(clsT); clsMsg("Scanner phone confirmed: "+(m.sel==="__all__"?"all classes":"class "+m.sel)+" ("+m.n+" students) \u2714",true); }
+  else if(m.t==="needclass"){ sendClass(true); }
+  else if(m.t==="roster"){ qrRoster=m.list||[]; updateQR(); }
   else if(m.t==="ans"){ qrAns[m.i]=m.answers||{}; if(m.i===i) updateQR(); }
 }
 function startRoom(attempt){
@@ -705,7 +707,9 @@ function renderCls(){
 }
 function clsPayload(){ const keys=ST.sel===ALLC?Object.keys(ST.c):(ST.c[ST.sel]?[ST.sel]:[]); const c={}; keys.forEach(k=>c[k]=ST.c[k]); return {t:"class",sel:ST.sel,c}; }
 let lastCls="";
-function sendClass(force){ const p=clsPayload(), j=JSON.stringify(p); if(!force && j===lastCls) return; lastCls=j; qrSend(p); }
+let clsT=null;
+function sendClass(force){ const p=clsPayload(), j=JSON.stringify(p); if(!force && j===lastCls) return; lastCls=j; qrSend(p);
+  if(qrMode){ clearTimeout(clsT); clsT=setTimeout(()=>clsMsg("The scanner phone has not confirmed the class. Upload the newest scanner.html (heading must show v6), reload the phone page and connect again.",false),8000); } }
 function clsMsg(txt,ok){ const m=$("clsinfo"); m.style.color=ok?"#1e8e3e":"#d93025"; m.textContent=txt; }
 $("clssel").onchange=()=>{ ST.sel=$("clssel").value; saveST(); renderCls(); sendClass(true); };
 $("impst").onclick=()=>$("stfile").click();
