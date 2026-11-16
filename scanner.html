@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>QR Quiz Scanner</title>
+<title>Paper QR Quiz - Scanner</title>
 <style>
 :root{--navy:#14284B;--gold:#C9A227;--bg:#F4F6FB;--card:#fff;--line:#cfd6e6;--ink:#142038;--muted:#5b6780;
 --ok:#1e8e3e;--okbg:#d9f2e0;--bad:#d93025;--badbg:#fde0dd;--got:#e3ebfb}
@@ -50,7 +50,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--navy);margin-bottom:6
 </head>
 <body>
 <header>
-  <div><h1>QR Quiz Scanner</h1><div class="by">Prepared by Kartik Mangla and Team &middot; Vrindavan Public School</div></div>
+  <div><h1>Paper QR Quiz &mdash; Scanner <small style="font-size:.4em;opacity:.7">v6</small></h1><div class="by">Prepared by Kartik Mangla and team</div></div>
   <div id="qinfo" style="font-size:18px;font-weight:700;color:#f1e3a9"></div>
 </header>
 
@@ -10860,9 +10860,19 @@ function pSend(m){try{ if(conn&&conn.open) conn.send(m); else if(relayLinked) RE
 function sendRoster(){ pSend({t:"roster",list:roster().map(r=>({key:r.key,name:r.name}))}); }
 function sendAns(){ pSend({t:"ans",i:q,answers:answers[q]}); }
 let linkTimers=[];
+let lastClsJ="";
+function applyClass(m){
+  const j=JSON.stringify(m); if(j===lastClsJ){ pSend({t:"classok",sel:ST.sel,n:roster().length}); return; } lastClsJ=j;
+  const c=m.c||{}; Object.keys(c).forEach(k=>{ const dst=ST.c[k]=ST.c[k]||{}; Object.keys(c[k]).forEach(r=>{ const nm=c[k][r]; if(nm||dst[r]===undefined) dst[r]=nm||dst[r]||""; }); });
+  ST.sel=(m.sel&&m.sel!==ALL&&ST.c[m.sel])?m.sel:ALL; changed("");
+  $("impinfo").style.color="#1e8e3e"; $("impinfo").textContent="Class set from the projector quiz: "+(ST.sel===ALL?"all classes":ST.sel)+".";
+  pSend({t:"classok",sel:ST.sel,n:roster().length});
+  try{ $("pstat").textContent="Connected \u2714 \u00b7 Class from quiz: "+(ST.sel===ALL?"all classes":ST.sel)+" ("+roster().length+" students)"; }catch(e){}
+}
 function projMsg(m){
   if(!m) return;
   if(m.t==="q"){ if(q!==m.i){ q=m.i; liveVotes={}; } ensureQ(); keyOf[q]=m.correct; renderAll(); }
+  else if(m.t==="class"){ applyClass(m); }
   else if(m.t==="reveal"){ if(q!==m.i){ q=m.i; ensureQ(); } shown[q]=true; renderAll(); }
 }
 function pconnect(){
@@ -10872,13 +10882,13 @@ function pconnect(){
   try{ RELAY.stop(); }catch(e){}
   conn=null; relayLinked=false;
   let linked=false, perr="", tries=0;
-  const ok=how=>{ if(linked&&how!=="direct") return; if(!linked){ linked=true; $("pstat").textContent="Connected to projector \u2714 (code "+code+(how==="relay"?", via internet relay":"")+")"; sendRoster(); sendAns(); } };
+  const ok=how=>{ if(linked&&how!=="direct") return; if(!linked){ linked=true; $("pstat").textContent="Connected to projector \u2714 (code "+code+(how==="relay"?", via internet relay":"")+")"; sendRoster(); sendAns(); pSend({t:"needclass"}); } };
   $("pstat").textContent="Connecting to the projector...";
   // route 1: relay through the internet (works between different networks)
   const onRelay=m=>{ if(!m) return; if(m.t==="hello"){ relayLinked=true; ok("relay"); } else projMsg(m); };
   try{ RELAY.start(code,"s",onRelay,n=>{}); }catch(e){}
   const helloT=setInterval(()=>{ if(!linked){ RELAY.send({t:"hello"}); } },1500); linkTimers.push(helloT);
-  const resend=setInterval(()=>{ if(relayLinked && !(conn&&conn.open)) sendAns(); },4000); linkTimers.push(resend);
+  const resend=setInterval(()=>{ if(relayLinked && !(conn&&conn.open)) sendAns(); if(!lastClsJ && (relayLinked||(conn&&conn.open))) pSend({t:"needclass"}); },4000); linkTimers.push(resend);
   // route 2: direct link (fast on the same network)
   const direct=()=>{
     if(typeof Peer==="undefined") return;
