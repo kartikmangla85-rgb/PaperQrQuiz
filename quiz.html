@@ -55,14 +55,15 @@ footer{display:flex;gap:1.2vw;justify-content:center;align-items:center;padding:
 .hide{display:none!important}
 .hint{color:var(--muted);font-size:clamp(12px,1.3vw,20px)}
 .qrstat{margin-left:14px;font-size:.8em;color:#9be3ae}
-#quiz.qr{flex-direction:row;align-items:center;gap:2.5vw;justify-content:flex-start}
+#quiz.qr{flex-direction:row;align-items:flex-start;gap:2.5vw;justify-content:flex-start}
 #quiz.qr #qleft{flex:1.25;min-width:0}
-#quiz.qr .q{font-size:clamp(20px,2.6vw,44px);margin-bottom:1.2vw}
-#quiz.qr .opts{grid-template-columns:1fr;gap:.8vw}
-#quiz.qr .opt{font-size:clamp(16px,1.9vw,32px);padding:.7vw 1.1vw}
-#quiz.qr .feedback{font-size:clamp(16px,1.8vw,30px);margin-top:1vw}
+#quiz.qr .q{font-size:clamp(18px,min(2.6vw,4.4vh),44px);margin:.2em 0 .6em}
+#quiz.qr .opts{grid-template-columns:1fr;gap:min(.8vw,1vh)}
+#quiz.qr .opt{font-size:clamp(14px,min(1.9vw,2.9vh),32px);padding:min(.6vw,.8vh) 1.1vw}
+#quiz.qr .feedback{font-size:clamp(14px,min(1.8vw,3.2vh),30px);margin-top:.6vw}
+#quiz.qr #qleft{align-self:flex-start}
 #qrpanel{display:none}
-#quiz.qr #qrpanel{display:block;flex:1;min-width:0;align-self:stretch;background:#fff;border:2px solid var(--line);border-radius:1vw;padding:1vw 1.3vw;overflow:auto}
+#quiz.qr #qrpanel{display:block;flex:1;min-width:0;align-self:stretch;max-height:100%;background:#fff;border:2px solid var(--line);border-radius:1vw;padding:1vw 1.3vw;overflow:auto}
 #qrpanel h3{margin:0 0 .4em;color:var(--navy);font-size:clamp(16px,1.8vw,28px)}
 #qrcount{font-weight:700;font-size:clamp(16px,1.8vw,28px);margin-bottom:.6em}
 .tl{display:grid;grid-template-columns:2em 1fr 2.2em;align-items:center;gap:.6em;margin:.3em 0;font-size:clamp(14px,1.6vw,26px)}
@@ -75,6 +76,15 @@ footer{display:flex;gap:1.2vw;justify-content:center;align-items:center;padding:
 .nm em{font-style:normal;font-weight:800;margin-left:.3em}
 .room{font-size:clamp(28px,5vw,80px);font-weight:800;letter-spacing:.15em;color:var(--navy)}
 @media (max-width:760px){.opts{grid-template-columns:1fr} main{padding:4vw} .opt{padding:3vw} .q{margin-bottom:4vw}}
+
+#end .score{font-size:clamp(36px,min(9vw,14vh),150px)}
+#rep{margin:.8em auto 0;max-width:900px;width:100%;text-align:left}
+#rep table{width:100%;border-collapse:collapse;font-size:clamp(14px,1.5vw,24px)}
+#rep th,#rep td{padding:.35em .6em;border-bottom:1px solid var(--line)}
+#rep th{background:var(--navy);color:#fff;position:sticky;top:0}
+#rep td.n,#rep th.n{text-align:right}
+#repbox{max-height:46vh;overflow:auto;border:2px solid var(--line);border-radius:12px;background:#fff}
+#rep tr.g td{color:#1e8e3e;font-weight:700} #rep tr.z td{color:#8a8fa3}
 </style>
 </head>
 <body>
@@ -155,8 +165,11 @@ footer{display:flex;gap:1.2vw;justify-content:center;align-items:center;padding:
     <h2>Quiz Complete!</h2>
     <div class="score" id="score"></div>
     <p class="hint" id="pct" style="font-size:clamp(18px,2.4vw,38px)"></p>
+    <div id="rep" class="hide"><div id="repbox"></div></div>
     <p class="hint byl">Prepared by Kartik Mangla and team</p>
     <div class="row">
+      <button class="btn gold hide" id="dlrep">Download report (Excel/CSV)</button>
+      <button class="btn ghost hide" id="repnm">Names: On</button>
       <button class="btn gold hide" id="revskip">Go back to skipped questions</button>
       <button class="btn gold" id="again">Play Again</button>
       <button class="btn ghost" id="home">Change Settings</button>
@@ -492,6 +505,7 @@ function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random
 
 function shufOpts(q){ const idx=[0,1,2,3]; shuffle(idx); return Object.assign({},q,{o:idx.map(k=>q.o[k]),a:idx.indexOf(q.a)}); }
 function build(){
+  qrAns={}; try{ qrSend({t:"reset"}); }catch(e){}
   let pool = cur().qs.slice();
   if(chapter!=="__all__") pool = pool.filter(x=>x.c===chapter);
   if(qtype!=="all") pool = pool.filter(x=>x.t===qtype);
@@ -602,10 +616,11 @@ function next(){
 function finish(){
   $("prog").style.width="100%";
   $("meta").textContent="";
-  if(qrMode){ $("score").textContent = deck.length + " questions"; $("pct").textContent = "Well done, class!"; }
+  if(qrMode){ renderEnd(); }
   else { $("score").textContent = score + " / " + deck.length; $("pct").textContent = Math.round(score/deck.length*100) + "% correct on the first try"; }
   const sk=skippedList().length;
   if(sk) $("pct").textContent += " \u00b7 " + sk + " skipped";
+  $("rep").classList.toggle("hide",!qrMode); $("dlrep").classList.toggle("hide",!qrMode); $("repnm").classList.toggle("hide",!qrMode);
   $("revskip").classList.toggle("hide", sk===0);
   $("revskip").textContent = "Go back to skipped questions (" + sk + ")";
   show("end");
@@ -688,6 +703,38 @@ function updateQR(){
   const sec=(title,cls,arr,showL)=>'<div class="grp '+cls+'"><div class="gh">'+title+' ('+arr.length+')</div>'+(showNames?arr.map(k=>'<span class="nm">'+esc(nameOf(k))+(showL?'<em>'+A[k]+'</em>':'')+'</span>').join(""):"")+'</div>';
   $("qrnames").innerHTML=sec("Correct","ok",ok,false)+sec("Wrong","bad",bad,true)+sec("Not scanned","none",none,false);
 }
+
+/* ---------- end screen: student-wise scores + downloadable report ---------- */
+function qrReport(){
+  const asked=[]; deck.forEach((d,k)=>{ if(state[k]&&state[k].done) asked.push(k); });
+  const keys=new Set(qrRoster.map(r=>r.key)); asked.forEach(k=>Object.keys(qrAns[k]||{}).forEach(x=>keys.add(x)));
+  const nameOf=k=>{const r=qrRoster.find(x=>x.key===k);return (r&&r.name)||"";};
+  const rows=[...keys].map(key=>{
+    const ix=key.lastIndexOf("-"), cls=ix<0?"":key.slice(0,ix), roll=ix<0?key:key.slice(ix+1);
+    const ans=asked.map(k=>(qrAns[k]||{})[key]||""); const cor=asked.reduce((n,k,j)=>n+(ans[j]==="ABCD"[deck[k].a]?1:0),0);
+    return {key,cls,roll,name:nameOf(key),ans,cor,seen:ans.some(a=>a)};
+  }).sort((a,b)=>a.cls.localeCompare(b.cls,undefined,{numeric:true})||(+a.roll-+b.roll));
+  return {asked,rows,total:asked.length};
+}
+function renderEnd(){
+  const R=qrReport(), sc=R.rows.filter(r=>r.seen), n=sc.length;
+  const avg=n?sc.reduce((a,r)=>a+r.cor,0)/n:0, best=n?Math.max(...sc.map(r=>r.cor)):0;
+  $("score").textContent = n? (avg.toFixed(1)+" / "+R.total) : (R.total+" questions");
+  $("pct").textContent = n? ("Class average \u00b7 "+n+" student"+(n===1?"":"s")+" scanned \u00b7 highest "+best+" / "+R.total) : "No student cards were scanned.";
+  const t='<table><tr><th>Roll</th>'+(showNames?'<th>Name</th>':'')+'<th class="n">Score</th><th class="n">%</th></tr>'+R.rows.map(r=>'<tr class="'+(r.seen?(r.cor===best&&best>0?"g":""):"z")+'"><td>'+esc((r.cls?r.cls+"-":"")+r.roll)+'</td>'+(showNames?'<td>'+esc(r.name)+'</td>':'')+'<td class="n">'+(r.seen?r.cor+" / "+R.total:"\u2014")+'</td><td class="n">'+(r.seen&&R.total?Math.round(r.cor/R.total*100)+"%":"")+'</td></tr>').join("")+'</table>';
+  $("repbox").innerHTML=R.rows.length?t:'<div class="hint" style="padding:1em">No scanned answers to show. Scan the cards on each question, then press Show Answer.</div>';
+}
+$("repnm").onclick=()=>{ showNames=!showNames; $("repnm").textContent="Names: "+(showNames?"On":"Off"); $("nmtoggle").textContent="Names: "+(showNames?"On":"Off"); renderEnd(); };
+$("dlrep").onclick=()=>{
+  const R=qrReport(), q=cur(), d=new Date(), ds=d.toISOString().slice(0,10);
+  const head=["Class","Roll","Name"].concat(R.asked.map((k,j)=>"Q"+(j+1))).concat(["Correct","Total","Percent"]);
+  const rows=[["Paper QR Quiz \u2014 "+q.name+" \u2014 "+ds],head];
+  R.rows.forEach(r=>rows.push([r.cls,r.roll,r.name].concat(r.ans).concat([r.seen?r.cor:"",R.total,r.seen&&R.total?Math.round(r.cor/R.total*100)+"%":""])));
+  rows.push([]); rows.push(["","","Correct answer"].concat(R.asked.map(k=>"ABCD"[deck[k].a])).concat(["","",""]));
+  const sc=R.rows.filter(r=>r.seen);
+  rows.push(["","","% students correct"].concat(R.asked.map((k,j)=>sc.length?Math.round(sc.filter(r=>r.ans[j]==="ABCD"[deck[k].a]).length/sc.length*100)+"%":"")).concat(["","",""]));
+  VPS.download("Paper_QR_Quiz_report_"+q.name.replace(/[^A-Za-z0-9]+/g,"_")+"_"+ds+".csv",rows.map(VPS.csvLine).join("\r\n"));
+};
 $("qrconnect").onclick=()=>startRoom(0);
 $("nmtoggle").onclick=()=>{ showNames=!showNames; $("nmtoggle").textContent="Names: "+(showNames?"On":"Off"); updateQR(); };
 
